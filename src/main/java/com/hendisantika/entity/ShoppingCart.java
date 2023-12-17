@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -48,5 +49,9 @@ public class ShoppingCart extends PanacheEntityBase {
 
     public static Uni<ShoppingCart> findByShoppingCartId(Long id) {
         return find("#ShoppingCart.getById", id).firstResult();
+    }
+
+    public static Uni<List<ShoppingCart>> getAllShoppingCarts() {
+        return find("#ShoppingCart.findAll").list();
     }
 }

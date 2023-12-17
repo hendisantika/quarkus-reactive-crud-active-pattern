@@ -75,6 +75,41 @@ public class ShoppingCart extends PanacheEntityBase {
                 .transform(t -> new IllegalStateException(t));
     }
 
+    public static Uni<ShoppingCart> addProductToShoppingCart(Long shoppingCartId, Long productId) {
+        Uni<ShoppingCart> cart = findById(shoppingCartId);
+        Uni<Set<ShoppingCartItem>> cartItemsUni = cart
+                .chain(shoppingCart -> Mutiny.fetch(shoppingCart.cartItems)).onFailure().recoverWithNull();
+        Uni<Product> productUni = Product.findByProductId(productId);
+        Uni<ShoppingCartItem> item = ShoppingCartItem.findByCartIdByProductId(shoppingCartId, productId).toUni();
+
+        Uni<Tuple4<ShoppingCart, Set<ShoppingCartItem>, ShoppingCartItem, Product>> responses = Uni.combine()
+                .all().unis(cart, cartItemsUni, item, productUni).asTuple();
+
+        return Panache
+                .withTransaction(() -> responses
+                        .onItem().ifNotNull()
+                        .transform(entity -> {
+
+                            if (entity.getItem1() == null || entity.getItem4() == null
+                                    || entity.getItem2() == null) {
+                                return null;
+                            }
+
+                            if (entity.getItem3() == null) {
+                                ShoppingCartItem cartItem = ShoppingCartItem.builder()
+                                        .cart(entity.getItem1())
+                                        .product(entity.getItem4())
+                                        .quantity(1)
+                                        .build();
+                                entity.getItem2().add(cartItem);
+                            } else {
+                                entity.getItem3().quantity++;
+                            }
+                            entity.getItem1().calculateCartTotal();
+                            return entity.getItem1();
+                        }));
+    }
+
     public static Uni<ShoppingCart> deleteProductFromShoppingCart(Long shoppingCartId, Long productId) {
 
         Uni<ShoppingCart> cart = findById(shoppingCartId);

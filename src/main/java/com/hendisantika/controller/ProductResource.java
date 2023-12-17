@@ -2,12 +2,11 @@ package com.hendisantika.controller;
 
 import com.hendisantika.entity.Product;
 import io.smallrye.mutiny.Uni;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.net.URI;
 
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 
@@ -37,5 +36,15 @@ public class ProductResource {
         return Product.findByProductId(id)
                 .onItem().ifNotNull().transform(product -> Response.ok(product).build())
                 .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Uni<Response> add(Product product) {
+        return Product.addProduct(product)
+                .onItem().transform(id -> URI.create("/v1/products/" + id.id))
+                .onItem().transform(uri -> Response.created(uri))
+                .onItem().transform(Response.ResponseBuilder::build);
     }
 }

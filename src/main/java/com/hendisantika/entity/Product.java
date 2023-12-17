@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 
 /**
@@ -59,5 +60,16 @@ public class Product extends PanacheEntityBase {
                             return entity;
                         })
                         .onFailure().recoverWithNull());
+    }
+
+    public static Uni<Product> addProduct(Product product) {
+        return Panache
+                .withTransaction(product::persist)
+                .replaceWith(product)
+                .ifNoItem()
+                .after(Duration.ofMillis(10000))
+                .fail()
+                .onFailure()
+                .transform(t -> new IllegalStateException(t));
     }
 }

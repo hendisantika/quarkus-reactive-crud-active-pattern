@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
+import static org.jboss.resteasy.reactive.RestResponse.Status.OK;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,4 +60,11 @@ public class ProductResource {
                 .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
     }
 
+    @DELETE
+    @Path("{id}")
+    public Uni<Response> delete(@PathParam("id") Long id) {
+        return Product.deleteProduct(id)
+                .onItem().transform(entity -> !entity ? Response.serverError().status(NOT_FOUND).build()
+                        : Response.ok().status(OK).build());
+    }
 }

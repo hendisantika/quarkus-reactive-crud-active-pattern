@@ -84,6 +84,10 @@ public class Product extends PanacheEntityBase {
                 .fail()
                 .onFailure()
                 .recoverWithUni(Uni.createFrom().<List<PanacheEntityBase>>item(Collections.EMPTY_LIST));
-
     }
+
+    public static Uni<Boolean> deleteProduct(Long id) {
+        return Panache.withTransaction(() -> deleteById(id));
+    }
+
 }

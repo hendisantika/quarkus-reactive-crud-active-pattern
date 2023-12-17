@@ -59,4 +59,7 @@ public class ShoppingCartItem extends PanacheEntityBase {
         return stream("cart.id = ?1 and product.id = ?2", cartId, productId);
     }
 
+    public String toString() {
+        return this.getClass().getSimpleName() + "<" + this.id + ">";
+    }
 }

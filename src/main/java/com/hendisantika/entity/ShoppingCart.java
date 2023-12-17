@@ -1,5 +1,6 @@
 package com.hendisantika.entity;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -60,4 +62,14 @@ public class ShoppingCart extends PanacheEntityBase {
         return stream("SELECT c FROM ShoppingCart c LEFT JOIN FETCH c.cartItems");
     }
 
+    public static Uni<ShoppingCart> createShoppingCart(ShoppingCart shoppingCart) {
+        return Panache
+                .withTransaction(shoppingCart::persist)
+                .replaceWith(shoppingCart)
+                .ifNoItem()
+                .after(Duration.ofMillis(10000))
+                .fail()
+                .onFailure()
+                .transform(t -> new IllegalStateException(t));
+    }
 }

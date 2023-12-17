@@ -2,6 +2,7 @@ package com.hendisantika.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.smallrye.common.constraint.NotNull;
+import io.smallrye.mutiny.Multi;
 import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -53,4 +54,9 @@ public class ShoppingCartItem extends PanacheEntityBase {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Product product;
+
+    public static Multi<ShoppingCartItem> findByCartIdByProductId(Long cartId, Long productId) {
+        return stream("cart.id = ?1 and product.id = ?2", cartId, productId);
+    }
+
 }

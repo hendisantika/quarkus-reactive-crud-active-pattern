@@ -1,5 +1,6 @@
 package com.hendisantika.entity;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.smallrye.mutiny.Uni;
 import jakarta.json.bind.annotation.JsonbDateFormat;
@@ -48,4 +49,15 @@ public class Product extends PanacheEntityBase {
         return findById(id);
     }
 
+    public static Uni<Product> updateProduct(Long id, Product product) {
+        return Panache
+                .withTransaction(() -> findByProductId(id)
+                        .onItem().ifNotNull()
+                        .transform(entity -> {
+                            entity.description = product.description;
+                            entity.title = product.title;
+                            return entity;
+                        })
+                        .onFailure().recoverWithNull());
+    }
 }

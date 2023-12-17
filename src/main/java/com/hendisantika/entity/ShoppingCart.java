@@ -1,6 +1,7 @@
 package com.hendisantika.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import io.smallrye.mutiny.Uni;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,4 +46,7 @@ public class ShoppingCart extends PanacheEntityBase {
         cartTotal = cartItems.stream().mapToInt(ShoppingCartItem::getQuantity).sum();
     }
 
+    public static Uni<ShoppingCart> findByShoppingCartId(Long id) {
+        return find("#ShoppingCart.getById", id).firstResult();
+    }
 }

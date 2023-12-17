@@ -2,6 +2,7 @@ package com.hendisantika.entity;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import io.quarkus.panache.common.Sort;
 import io.smallrye.mutiny.Uni;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 import jakarta.persistence.*;
@@ -13,6 +14,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -71,5 +74,16 @@ public class Product extends PanacheEntityBase {
                 .fail()
                 .onFailure()
                 .transform(t -> new IllegalStateException(t));
+    }
+
+    public static Uni<List<Product>> getAllProducts() {
+        return Product
+                .listAll(Sort.by("createdAt"))
+                .ifNoItem()
+                .after(Duration.ofMillis(10000))
+                .fail()
+                .onFailure()
+                .recoverWithUni(Uni.createFrom().<List<PanacheEntityBase>>item(Collections.EMPTY_LIST));
+
     }
 }

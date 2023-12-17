@@ -1,6 +1,12 @@
 package com.hendisantika.controller;
 
+import com.hendisantika.entity.Product;
+import io.smallrye.mutiny.Uni;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,4 +20,11 @@ import jakarta.ws.rs.Path;
  */
 @Path("/v1/products")
 public class ProductResource {
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> getProducts() {
+        return Product.getAllProducts()
+                .onItem().transform(products -> Response.ok(products))
+                .onItem().transform(Response.ResponseBuilder::build);
+    }
 }

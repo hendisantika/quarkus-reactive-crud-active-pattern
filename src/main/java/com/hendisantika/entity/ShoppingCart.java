@@ -103,6 +103,9 @@ public class ShoppingCart extends PanacheEntityBase {
                             return entity.getItem1();
                         }));
 
+    }
 
+    public String toString() {
+        return this.getClass().getSimpleName() + "<" + this.id + ">";
     }
 }

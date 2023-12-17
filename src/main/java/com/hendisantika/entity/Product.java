@@ -90,4 +90,7 @@ public class Product extends PanacheEntityBase {
         return Panache.withTransaction(() -> deleteById(id));
     }
 
+    public String toString() {
+        return this.getClass().getSimpleName() + "<" + this.id + ">";
+    }
 }

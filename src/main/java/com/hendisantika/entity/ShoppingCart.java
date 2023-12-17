@@ -4,10 +4,12 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.tuples.Tuple4;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.time.Duration;
 import java.util.List;
@@ -71,5 +73,36 @@ public class ShoppingCart extends PanacheEntityBase {
                 .fail()
                 .onFailure()
                 .transform(t -> new IllegalStateException(t));
+    }
+
+    public static Uni<ShoppingCart> deleteProductFromShoppingCart(Long shoppingCartId, Long productId) {
+
+        Uni<ShoppingCart> cart = findById(shoppingCartId);
+        Uni<Set<ShoppingCartItem>> cartItemsUni = cart
+                .chain(shoppingCart -> Mutiny.fetch(shoppingCart.cartItems)).onFailure().recoverWithNull();
+
+        Uni<Product> productUni = Product.findByProductId(productId);
+        Uni<ShoppingCartItem> item = ShoppingCartItem.findByCartIdByProductId(shoppingCartId, productId).toUni();
+
+        Uni<Tuple4<ShoppingCart, Set<ShoppingCartItem>, ShoppingCartItem, Product>> responses = Uni.combine()
+                .all().unis(cart, cartItemsUni, item, productUni).asTuple();
+
+        return Panache
+                .withTransaction(() -> responses
+                        .onItem().ifNotNull()
+                        .transform(entity -> {
+                            if (entity.getItem1() == null || entity.getItem4() == null
+                                    || entity.getItem3() == null) {
+                                return null;
+                            }
+                            entity.getItem3().quantity--;
+                            if (entity.getItem3().quantity == 0) {
+                                entity.getItem2().remove(entity.getItem3());
+                            }
+                            entity.getItem1().calculateCartTotal();
+                            return entity.getItem1();
+                        }));
+
+
     }
 }

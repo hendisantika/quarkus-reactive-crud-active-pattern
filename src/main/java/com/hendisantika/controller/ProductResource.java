@@ -47,4 +47,16 @@ public class ProductResource {
                 .onItem().transform(uri -> Response.created(uri))
                 .onItem().transform(Response.ResponseBuilder::build);
     }
+
+    @PUT
+    @Path("{id}")
+    public Uni<Response> update(@PathParam("id") Long id, Product product) {
+        if (product == null || product.description == null) {
+            throw new WebApplicationException("Product description was not set on request.", 422);
+        }
+        return Product.updateProduct(id, product)
+                .onItem().ifNotNull().transform(entity -> Response.ok(entity).build())
+                .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
+    }
+
 }

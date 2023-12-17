@@ -40,4 +40,15 @@ public class ProductResourceTest {
                 .then()
                 .statusCode(201);
     }
+
+    @Test
+    @Order(2)
+    public void testGetAll() {
+        given()
+                .when()
+                .header("Content-Type", "application/json")
+                .get("/v1/products")
+                .then()
+                .statusCode(200);
+    }
 }

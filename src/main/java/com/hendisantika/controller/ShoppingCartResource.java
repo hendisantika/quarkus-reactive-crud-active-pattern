@@ -60,4 +60,13 @@ public class ShoppingCartResource {
                 .onItem().ifNotNull().transform(entity -> Response.ok(entity).build())
                 .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
     }
+
+    @DELETE
+    @Path("{cartid}/{productid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> delete(@PathParam("cartid") Long id, @PathParam("productid") Long product) {
+        return ShoppingCart.deleteProductFromShoppingCart(id, product)
+                .onItem().ifNotNull().transform(entity -> Response.ok(entity).build())
+                .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
+    }
 }

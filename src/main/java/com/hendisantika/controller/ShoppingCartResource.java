@@ -2,12 +2,11 @@ package com.hendisantika.controller;
 
 import com.hendisantika.entity.ShoppingCart;
 import io.smallrye.mutiny.Uni;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.net.URI;
 
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 
@@ -38,6 +37,18 @@ public class ShoppingCartResource {
         return ShoppingCart.findByShoppingCartId(id)
                 .onItem().ifNotNull().transform(cart -> Response.ok(cart).build())
                 .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
+    }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Uni<Response> createShoppingCart(ShoppingCart shoppingCart) {
+        if (shoppingCart == null || shoppingCart.name == null) {
+            throw new WebApplicationException("ShoppingCart name was not set on request.", 422);
+        }
+        return ShoppingCart.createShoppingCart(shoppingCart)
+                .onItem().transform(id -> URI.create("/v1/carts/" + id.id))
+                .onItem().transform(uri -> Response.created(uri))
+                .onItem().transform(Response.ResponseBuilder::build);
     }
 }

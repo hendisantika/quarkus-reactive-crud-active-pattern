@@ -1,6 +1,7 @@
 package com.hendisantika.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import io.smallrye.mutiny.Uni;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,4 +43,9 @@ public class Product extends PanacheEntityBase {
     @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
     @UpdateTimestamp
     public ZonedDateTime updatedAt;
+
+    public static Uni<Product> findByProductId(Long id) {
+        return findById(id);
+    }
+
 }

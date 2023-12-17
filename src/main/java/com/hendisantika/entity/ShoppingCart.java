@@ -1,6 +1,7 @@
 package com.hendisantika.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -54,4 +55,9 @@ public class ShoppingCart extends PanacheEntityBase {
     public static Uni<List<ShoppingCart>> getAllShoppingCarts() {
         return find("#ShoppingCart.findAll").list();
     }
+
+    public static Multi<ShoppingCart> findAllWithJoinFetch() {
+        return stream("SELECT c FROM ShoppingCart c LEFT JOIN FETCH c.cartItems");
+    }
+
 }

@@ -40,4 +40,9 @@ public class ShoppingCart extends PanacheEntityBase {
     public Set<ShoppingCartItem> cartItems;
 
     public String name;
+
+    public void calculateCartTotal() {
+        cartTotal = cartItems.stream().mapToInt(ShoppingCartItem::getQuantity).sum();
+    }
+
 }

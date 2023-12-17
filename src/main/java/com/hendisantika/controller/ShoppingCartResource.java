@@ -51,4 +51,13 @@ public class ShoppingCartResource {
                 .onItem().transform(uri -> Response.created(uri))
                 .onItem().transform(Response.ResponseBuilder::build);
     }
+
+    @PUT
+    @Path("{cartid}/{productid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> update(@PathParam("cartid") Long id, @PathParam("productid") Long product) {
+        return ShoppingCart.addProductToShoppingCart(id, product)
+                .onItem().ifNotNull().transform(entity -> Response.ok(entity).build())
+                .onItem().ifNull().continueWith(Response.ok().status(NOT_FOUND)::build);
+    }
 }

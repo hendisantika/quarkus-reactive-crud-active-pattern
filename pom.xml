@@ -21,7 +21,7 @@
         <quarkus.platform.version>3.28.1</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
-        <lombok.version>1.18.40</lombok.version>
+        <lombok.version>1.18.42</lombok.version>
     </properties>
     <dependencyManagement>
         <dependencies>
